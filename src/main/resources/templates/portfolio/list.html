@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portafolios - Project Manager</title>
+    <headers th:replace="~{components/headers.html :: ~{_headers}}" />
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Sidebar Backdrop -->
+    <div class="sidebar-backdrop"></div>
+
+    <sliderbar th:replace="~{components/sliderbar.html :: ~{_sliderbar}}" />
+    <navbar th:replace="~{components/navbar.html :: ~{_navbar}}" />
+
+    <!-- Main Content -->
+    <div id="main-content" class="main-content">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col">
+                    <h2 class="mb-0">Portafolios</h2>
+                </div>
+                <div class="col text-end">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#portfolioModal">
+                        <i class="fas fa-plus"></i> Nuevo Portafolio
+                    </button>
+                </div>
+            </div>
+
+            <!-- Portfolio Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Inicio</th>
+                                    <th>Fecha Fin</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="portfolio : ${portfolios}">
+                                    <td th:text="${portfolio.name}"></td>
+                                    <td th:text="${portfolio.description}"></td>
+                                    <td>
+                                        <span th:class="${portfolio.status == T(com.losung.projectmanager.model.PortfolioStatus).ACTIVO ? 'badge bg-success' : 
+                                                       (portfolio.status == T(com.losung.projectmanager.model.PortfolioStatus).COMPLETADO ? 'badge bg-info' : 
+                                                       (portfolio.status == T(com.losung.projectmanager.model.PortfolioStatus).CANCELADO ? 'badge bg-danger' : 
+                                                       'badge bg-warning'))}"
+                                              th:text="${portfolio.status}">
+                                        </span>
+                                    </td>
+                                    <td th:text="${#temporals.format(portfolio.startDate, 'dd/MM/yyyy')}"></td>
+                                    <td th:text="${#temporals.format(portfolio.endDate, 'dd/MM/yyyy')}"></td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" title="Metas" 
+                                                    th:onclick="'showMetas(' + ${portfolio.id} + ')'">
+                                                <i class="fas fa-bullseye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary" title="Editar" 
+                                                    th:onclick="'editPortfolio(' + ${portfolio.id} + ')'">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Eliminar" 
+                                                    th:onclick="'confirmDelete(' + ${portfolio.id} + ')'">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Crear Portafolio -->
+    <div class="modal fade" id="portfolioModal" tabindex="-1" aria-labelledby="portfolioModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="portfolioModalLabel">Nuevo Portafolio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/portfolios}" method="post">
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Estado</label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="ACTIVO">Activo</option>
+                                    <option value="COMPLETADO">Completado</option>
+                                    <option value="CANCELADO">Cancelado</option>
+                                    <option value="EN_PAUSA">En Pausa</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label">Fecha de Inicio</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endDate" class="form-label">Fecha de Fin</label>
+                                <input type="date" class="form-control" id="endDate" name="endDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="mision" class="form-label">Misión</label>
+                            <textarea class="form-control" id="mision" name="misión" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="vision" class="form-label">Visión</label>
+                            <textarea class="form-control" id="vision" name="visión" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="valores" class="form-label">Valores</label>
+                            <textarea class="form-control" id="valores" name="valores" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="criteriosPriorizacion" class="form-label">Criterios de Priorización</label>
+                            <textarea class="form-control" id="criteriosPriorizacion" name="criteriosPriorizacion" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar este portafolio? Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="deleteForm" method="post" style="display: inline;">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Portafolio -->
+    <div class="modal fade" id="editPortfolioModal" tabindex="-1" aria-labelledby="editPortfolioModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPortfolioModalLabel">Editar Portafolio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editForm" method="post">
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editName" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="editName" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editStatus" class="form-label">Estado</label>
+                                <select class="form-select" id="editStatus" name="status" required>
+                                    <option value="ACTIVO">Activo</option>
+                                    <option value="COMPLETADO">Completado</option>
+                                    <option value="CANCELADO">Cancelado</option>
+                                    <option value="EN_PAUSA">En Pausa</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDescription" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editStartDate" class="form-label">Fecha de Inicio</label>
+                                <input type="date" class="form-control" id="editStartDate" name="startDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editEndDate" class="form-label">Fecha de Fin</label>
+                                <input type="date" class="form-control" id="editEndDate" name="endDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMision" class="form-label">Misión</label>
+                            <textarea class="form-control" id="editMision" name="misión" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editVision" class="form-label">Visión</label>
+                            <textarea class="form-control" id="editVision" name="visión" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editValores" class="form-label">Valores</label>
+                            <textarea class="form-control" id="editValores" name="valores" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCriteriosPriorizacion" class="form-label">Criterios de Priorización</label>
+                            <textarea class="form-control" id="editCriteriosPriorizacion" name="criteriosPriorizacion" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Metas -->
+    <div class="modal fade" id="metasModal" tabindex="-1" aria-labelledby="metasModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="metasModalLabel">Metas del Portafolio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaMetaModal">
+                            <i class="fas fa-plus"></i> Nueva Meta
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Inicio</th>
+                                    <th>Fecha Fin</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="metasTableBody">
+                                <!-- Las metas se cargarán dinámicamente aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Nueva Meta -->
+    <div class="modal fade" id="nuevaMetaModal" tabindex="-1" aria-labelledby="nuevaMetaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nuevaMetaModalLabel">Nueva Meta</h5>
+                    <button type="button" class="btn-close" onclick="handleNuevaMetaCancel()" aria-label="Close"></button>
+                </div>
+                <form id="nuevaMetaForm" onsubmit="return handleNuevaMetaSubmit(event)">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="nuevaMetaNombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nuevaMetaNombre" name="nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nuevaMetaDescripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="nuevaMetaDescripcion" name="descripcion" rows="3"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="nuevaMetaFechaInicio" class="form-label">Fecha de Inicio</label>
+                                <input type="date" class="form-control" id="nuevaMetaFechaInicio" name="fechaInicio" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nuevaMetaFechaFin" class="form-label">Fecha de Fin</label>
+                                <input type="date" class="form-control" id="nuevaMetaFechaFin" name="fechaFin" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nuevaMetaStatus" class="form-label">Estado</label>
+                            <select class="form-select" id="nuevaMetaStatus" name="status" required>
+                                <option value="PLANIFICADA">Planificada</option>
+                                <option value="EN_PROGRESO">En Progreso</option>
+                                <option value="COMPLETADA">Completada</option>
+                                <option value="CANCELADA">Cancelada</option>
+                                <option value="EN_PAUSA">En Pausa</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="nuevaMetaIndicador" name="indicador">
+                                <label class="form-check-label" for="nuevaMetaIndicador">
+                                    Es Indicador
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="nuevaMetaValorActual" class="form-label">Valor Actual</label>
+                                <input type="number" step="0.01" class="form-control" id="nuevaMetaValorActual" name="valorActual" disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nuevaMetaLineaBase" class="form-label">Línea Base</label>
+                                <input type="number" step="0.01" class="form-control" id="nuevaMetaLineaBase" name="lineaBase" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="handleNuevaMetaCancel()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación de Meta -->
+    <div class="modal fade" id="deleteMetaModal" tabindex="-1" aria-labelledby="deleteMetaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteMetaModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar esta meta? Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteMeta()">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Meta -->
+    <div class="modal fade" id="editMetaModal" tabindex="-1" aria-labelledby="editMetaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editMetaModalLabel">Editar Meta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editMetaForm" onsubmit="return handleEditMetaSubmit(event)">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="editMetaNombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="editMetaNombre" name="nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMetaDescripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="editMetaDescripcion" name="descripcion" rows="3"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editMetaFechaInicio" class="form-label">Fecha de Inicio</label>
+                                <input type="date" class="form-control" id="editMetaFechaInicio" name="fechaInicio" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editMetaFechaFin" class="form-label">Fecha de Fin</label>
+                                <input type="date" class="form-control" id="editMetaFechaFin" name="fechaFin" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMetaStatus" class="form-label">Estado</label>
+                            <select class="form-select" id="editMetaStatus" name="status" required>
+                                <option value="PLANIFICADA">Planificada</option>
+                                <option value="EN_PROGRESO">En Progreso</option>
+                                <option value="COMPLETADA">Completada</option>
+                                <option value="CANCELADA">Cancelada</option>
+                                <option value="EN_PAUSA">En Pausa</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editMetaIndicador" name="indicador">
+                                <label class="form-check-label" for="editMetaIndicador">
+                                    Es Indicador
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editMetaValorActual" class="form-label">Valor Actual</label>
+                                <input type="number" step="0.01" class="form-control" id="editMetaValorActual" name="valorActual" disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editMetaLineaBase" class="form-label">Línea Base</label>
+                                <input type="number" step="0.01" class="form-control" id="editMetaLineaBase" name="lineaBase" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script>
+        let deleteModal;
+        let editModal;
+        let metasModal;
+        let nuevaMetaModal;
+        let deleteMetaModal;
+        let editMetaModal;
+        let portfolioId;
+        let metaId;
+
+        // Función para manejar el cambio en el checkbox de indicador
+        function handleIndicadorChange(checkbox, valorActual, lineaBase) {
+            valorActual.disabled = !checkbox.checked;
+            lineaBase.disabled = !checkbox.checked;
+            
+            if (!checkbox.checked) {
+                valorActual.value = '';
+                lineaBase.value = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            editModal = new bootstrap.Modal(document.getElementById('editPortfolioModal'));
+            metasModal = new bootstrap.Modal(document.getElementById('metasModal'));
+            nuevaMetaModal = new bootstrap.Modal(document.getElementById('nuevaMetaModal'));
+            deleteMetaModal = new bootstrap.Modal(document.getElementById('deleteMetaModal'));
+            editMetaModal = new bootstrap.Modal(document.getElementById('editMetaModal'));
+            
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const backdrop = document.querySelector('.sidebar-backdrop');
+            
+            function toggleSidebar() {
+                const isMobile = window.innerWidth < 992;
+                
+                if (isMobile) {
+                    sidebar.classList.toggle('show');
+                    backdrop.classList.toggle('show');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('expanded');
+                }
+
+                // Cambiar el icono
+                const icon = sidebarToggle.querySelector('i');
+                if ((isMobile && sidebar.classList.contains('show')) || 
+                    (!isMobile && !sidebar.classList.contains('collapsed'))) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            }
+
+            function closeSidebar() {
+                if (window.innerWidth < 992) {
+                    sidebar.classList.remove('show');
+                    backdrop.classList.remove('show');
+                    const icon = sidebarToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            }
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            backdrop.addEventListener('click', closeSidebar);
+
+            // Cerrar sidebar al hacer clic en un enlace (en móvil)
+            const sidebarLinks = sidebar.querySelectorAll('.nav-link');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (window.innerWidth < 992) {
+                        closeSidebar();
+                    }
+                });
+            });
+
+            // Manejar cambios de tamaño de ventana
+            window.addEventListener('resize', () => {
+                const isMobile = window.innerWidth < 992;
+                
+                if (!isMobile) {
+                    // Si cambia a desktop
+                    closeSidebar();
+                } else {
+                    // Si cambia a móvil
+                    if (!sidebar.classList.contains('collapsed')) {
+                        sidebar.classList.remove('collapsed');
+                        mainContent.classList.remove('expanded');
+                    }
+                }
+            });
+
+            // Inicializar el evento del checkbox de indicador en el modal de nueva meta
+            const nuevaMetaIndicador = document.getElementById('nuevaMetaIndicador');
+            const nuevaMetaValorActual = document.getElementById('nuevaMetaValorActual');
+            const nuevaMetaLineaBase = document.getElementById('nuevaMetaLineaBase');
+
+            if (nuevaMetaIndicador && nuevaMetaValorActual && nuevaMetaLineaBase) {
+                nuevaMetaIndicador.addEventListener('change', function() {
+                    handleIndicadorChange(this, nuevaMetaValorActual, nuevaMetaLineaBase);
+                });
+            }
+        });
+
+        function confirmDelete(id) {
+            portfolioId = id;
+            const deleteForm = document.getElementById('deleteForm');
+            deleteForm.action = `/portfolios/${id}`;
+            deleteModal.show();
+        }
+
+        async function editPortfolio(id) {
+            try {
+                const response = await fetch(`/portfolios/${id}`);
+                const portfolio = await response.json();
+                
+                // Actualizar el formulario con los datos del portafolio
+                document.getElementById('editName').value = portfolio.name;
+                document.getElementById('editDescription').value = portfolio.description || '';
+                document.getElementById('editStartDate').value = portfolio.startDate.split('T')[0];
+                document.getElementById('editEndDate').value = portfolio.endDate.split('T')[0];
+                document.getElementById('editStatus').value = portfolio.status;
+                document.getElementById('editMision').value = portfolio.misión || '';
+                document.getElementById('editVision').value = portfolio.visión || '';
+                document.getElementById('editValores').value = portfolio.valores || '';
+                document.getElementById('editCriteriosPriorizacion').value = portfolio.criteriosPriorizacion || '';
+                
+                // Actualizar la acción del formulario
+                const editForm = document.getElementById('editForm');
+                editForm.action = `/portfolios/${id}/update`;
+                
+                // Mostrar el modal
+                editModal.show();
+            } catch (error) {
+                console.error('Error al cargar el portafolio:', error);
+                alert('Error al cargar el portafolio. Por favor, intente nuevamente.');
+            }
+        }
+
+        async function showMetas(id) {
+            portfolioId = id;
+            try {
+                const response = await fetch(`/portfolios/${id}/metas`);
+                const metas = await response.json();
+                
+                // Actualizar la tabla de metas
+                const tbody = document.getElementById('metasTableBody');
+                tbody.innerHTML = '';
+                
+                metas.forEach(meta => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${meta.nombre}</td>
+                        <td>${meta.descripcion || ''}</td>
+                        <td>
+                            <span class="badge ${getStatusBadgeClass(meta.status)}">
+                                ${meta.status}
+                            </span>
+                        </td>
+                        <td>${formatDate(meta.fechaInicio)}</td>
+                        <td>${formatDate(meta.fechaFin)}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-secondary" title="Editar" 
+                                        onclick="editMeta(${meta.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" title="Eliminar" 
+                                        onclick="confirmDeleteMeta(${meta.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                // Configurar el formulario de nueva meta
+                const nuevaMetaForm = document.getElementById('nuevaMetaForm');
+                nuevaMetaForm.action = `/portfolios/${id}/metas`;
+                
+                // Mostrar el modal
+                metasModal.show();
+            } catch (error) {
+                console.error('Error al cargar las metas:', error);
+                alert('Error al cargar las metas. Por favor, intente nuevamente.');
+            }
+        }
+
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'PLANIFICADA': return 'bg-secondary';
+                case 'EN_PROGRESO': return 'bg-primary';
+                case 'COMPLETADA': return 'bg-success';
+                case 'CANCELADA': return 'bg-danger';
+                case 'EN_PAUSA': return 'bg-warning';
+                default: return 'bg-secondary';
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            // Ajustar la fecha para evitar problemas de zona horaria
+            const date = new Date(dateString + 'T00:00:00');
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function confirmDeleteMeta(id) {
+            metaId = id;
+            deleteMetaModal.show();
+        }
+
+        async function deleteMeta() {
+            try {
+                const response = await fetch(`/portfolios/${portfolioId}/metas/${metaId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al eliminar la meta');
+                }
+
+                // Cerrar el modal de confirmación
+                deleteMetaModal.hide();
+
+                // Eliminar la fila de la tabla
+                const tbody = document.getElementById('metasTableBody');
+                const rows = tbody.getElementsByTagName('tr');
+                for (let row of rows) {
+                    const deleteButton = row.querySelector('button[onclick^="confirmDeleteMeta"]');
+                    if (deleteButton && deleteButton.getAttribute('onclick').includes(metaId)) {
+                        row.remove();
+                        break;
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al eliminar la meta. Por favor, intente nuevamente.');
+            }
+        }
+
+        async function handleNuevaMetaSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const metaData = {
+                nombre: formData.get('nombre'),
+                descripcion: formData.get('descripcion'),
+                fechaInicio: formData.get('fechaInicio'),
+                fechaFin: formData.get('fechaFin'),
+                status: formData.get('status'),
+                indicador: formData.get('indicador') === 'on',
+                valorActual: formData.get('valorActual') ? parseFloat(formData.get('valorActual')) : null,
+                lineaBase: formData.get('lineaBase') ? parseFloat(formData.get('lineaBase')) : null
+            };
+
+            try {
+                const response = await fetch(`/portfolios/${portfolioId}/metas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(metaData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al crear la meta');
+                }
+
+                // Cerrar solo el modal de nueva meta
+                nuevaMetaModal.hide();
+
+                // Recargar las metas en la tabla
+                await showMetas(portfolioId);
+                
+                // Limpiar el formulario
+                form.reset();
+                
+                // Asegurar que los campos estén deshabilitados después de limpiar el formulario
+                const nuevaMetaValorActual = document.getElementById('nuevaMetaValorActual');
+                const nuevaMetaLineaBase = document.getElementById('nuevaMetaLineaBase');
+                if (nuevaMetaValorActual && nuevaMetaLineaBase) {
+                    nuevaMetaValorActual.disabled = true;
+                    nuevaMetaLineaBase.disabled = true;
+                }
+                
+                return false;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al crear la meta. Por favor, intente nuevamente.');
+                return false;
+            }
+        }
+
+        async function editMeta(id) {
+            try {
+                const response = await fetch(`/portfolios/${portfolioId}/metas/${id}`);
+                const meta = await response.json();
+                
+                // Actualizar el formulario con los datos de la meta
+                document.getElementById('editMetaNombre').value = meta.nombre;
+                document.getElementById('editMetaDescripcion').value = meta.descripcion || '';
+                document.getElementById('editMetaFechaInicio').value = meta.fechaInicio.split('T')[0];
+                document.getElementById('editMetaFechaFin').value = meta.fechaFin.split('T')[0];
+                document.getElementById('editMetaStatus').value = meta.status;
+                document.getElementById('editMetaIndicador').checked = meta.indicador;
+                
+                // Habilitar/deshabilitar campos según el indicador
+                const editMetaValorActual = document.getElementById('editMetaValorActual');
+                const editMetaLineaBase = document.getElementById('editMetaLineaBase');
+                editMetaValorActual.disabled = !meta.indicador;
+                editMetaLineaBase.disabled = !meta.indicador;
+                
+                if (meta.indicador) {
+                    editMetaValorActual.value = meta.valorActual || '';
+                    editMetaLineaBase.value = meta.lineaBase || '';
+                } else {
+                    editMetaValorActual.value = '';
+                    editMetaLineaBase.value = '';
+                }
+                
+                // Guardar el ID de la meta para la actualización
+                metaId = id;
+                
+                // Mostrar el modal
+                editMetaModal.show();
+            } catch (error) {
+                console.error('Error al cargar la meta:', error);
+                alert('Error al cargar la meta. Por favor, intente nuevamente.');
+            }
+        }
+
+        async function handleEditMetaSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const metaData = {
+                nombre: formData.get('nombre'),
+                descripcion: formData.get('descripcion'),
+                fechaInicio: formData.get('fechaInicio'),
+                fechaFin: formData.get('fechaFin'),
+                status: formData.get('status'),
+                indicador: formData.get('indicador') === 'on',
+                valorActual: formData.get('valorActual') ? parseFloat(formData.get('valorActual')) : null,
+                lineaBase: formData.get('lineaBase') ? parseFloat(formData.get('lineaBase')) : null
+            };
+
+            try {
+                const response = await fetch(`/portfolios/${portfolioId}/metas/${metaId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(metaData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al actualizar la meta');
+                }
+
+                // Cerrar el modal de edición
+                editMetaModal.hide();
+
+                // Recargar las metas en la tabla
+                await showMetas(portfolioId);
+                
+                return false;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar la meta. Por favor, intente nuevamente.');
+                return false;
+            }
+        }
+
+        function handleNuevaMetaCancel() {
+            nuevaMetaModal.hide();
+            metasModal.show();
+        }
+    </script>
+</body>
+</html> 

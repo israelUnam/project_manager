@@ -29,9 +29,7 @@ public class Program {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProgramStatus status;
-
-    @OneToMany(mappedBy = "program", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Portfolio> portfolios;
+    
 
     @Column(name = "objetivo")
     private String objetivo;

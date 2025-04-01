@@ -1,8 +1,10 @@
 package com.losung.projectmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -26,16 +28,16 @@ public class Portfolio {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
-    @Column(name = "Mision")
+    @Column(name = "Mision", columnDefinition = "TEXT")
     private String misión;
 
-    @Column(name = "Visión")
+    @Column(name = "Visión", columnDefinition = "TEXT")
     private String visión;
 
-    @Column(name = "Valores")
+    @Column(name = "Valores", columnDefinition = "TEXT")
     private String valores;
 
-    @Column(name = "criterios_priorizacion")
+    @Column(name = "criterios_priorizacion", columnDefinition = "TEXT")
     private String criteriosPriorizacion;
 
 
@@ -48,7 +50,8 @@ public class Portfolio {
     private Program program;
 
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ObjetivoEstrategico> objetivosEstrategicos;
+    @JsonManagedReference
+    private List<Metas> metas = new ArrayList<>();
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
