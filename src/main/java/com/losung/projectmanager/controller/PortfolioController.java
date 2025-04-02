@@ -1,14 +1,11 @@
-package com.losung.projectmanager.controllers;
+package com.losung.projectmanager.controller;
 
 import com.losung.projectmanager.model.Portfolio;
-import com.losung.projectmanager.model.PortfolioStatus;
-import com.losung.projectmanager.repository.PortfolioRepository;
+import com.losung.projectmanager.service.PortfolioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 import java.util.List;
 
@@ -17,11 +14,11 @@ import java.util.List;
 public class PortfolioController {
 
     @Autowired
-    private PortfolioRepository portfolioRepository;
+    private PortfolioService portfolioService;
 
     @GetMapping
     public String listPortfolios(Model model) {
-        List<Portfolio> portfolios = portfolioRepository.findAll();
+        List<Portfolio> portfolios = portfolioService.findAll();
         model.addAttribute("portfolios", portfolios);
         return "portfolio/list";
     }
@@ -29,7 +26,7 @@ public class PortfolioController {
     @GetMapping("/{id}")
     @ResponseBody
     public Portfolio getPortfolio(@PathVariable Long id) {
-        return portfolioRepository.findById(id)
+        return portfolioService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Portafolio no encontrado"));
     }
 
@@ -45,18 +42,10 @@ public class PortfolioController {
             @RequestParam(required = false) String valores,
             @RequestParam(required = false) String criteriosPriorizacion) {
         
-        Portfolio portfolio = new Portfolio();
-        portfolio.setName(name);
-        portfolio.setDescription(description);
-        portfolio.setStartDate(LocalDateTime.parse(startDate + "T00:00:00"));
-        portfolio.setEndDate(LocalDateTime.parse(endDate + "T00:00:00"));
-        portfolio.setStatus(PortfolioStatus.valueOf(status));
-        portfolio.setMisión(misión);
-        portfolio.setVisión(visión);
-        portfolio.setValores(valores);
-        portfolio.setCriteriosPriorizacion(criteriosPriorizacion);
-        
-        portfolioRepository.save(portfolio);
+        portfolioService.createPortfolio(
+            name, description, startDate, endDate, status,
+            misión, visión, valores, criteriosPriorizacion
+        );
         return "redirect:/portfolios";
     }
 
@@ -73,28 +62,16 @@ public class PortfolioController {
             @RequestParam(required = false) String valores,
             @RequestParam(required = false) String criteriosPriorizacion) {
         
-        Portfolio portfolio = portfolioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Portafolio no encontrado"));
-        
-        portfolio.setName(name);
-        portfolio.setDescription(description);
-        portfolio.setStartDate(LocalDateTime.parse(startDate + "T00:00:00"));
-        portfolio.setEndDate(LocalDateTime.parse(endDate + "T00:00:00"));
-        portfolio.setStatus(PortfolioStatus.valueOf(status));
-        portfolio.setMisión(misión);
-        portfolio.setVisión(visión);
-        portfolio.setValores(valores);
-        portfolio.setCriteriosPriorizacion(criteriosPriorizacion);
-        
-        portfolioRepository.save(portfolio);
+        portfolioService.updatePortfolio(
+            id, name, description, startDate, endDate, status,
+            misión, visión, valores, criteriosPriorizacion
+        );
         return "redirect:/portfolios";
     }
 
     @RequestMapping(value = "/{id}", method = {RequestMethod.DELETE, RequestMethod.POST})
     public String deletePortfolio(@PathVariable Long id) {
-        if (portfolioRepository.existsById(id)) {
-            portfolioRepository.deleteById(id);
-        }
+        portfolioService.deletePortfolio(id);
         return "redirect:/portfolios";
     }
 } 

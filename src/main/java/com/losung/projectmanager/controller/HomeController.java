@@ -1,4 +1,4 @@
-package com.losung.projectmanager.controllers;
+package com.losung.projectmanager.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
