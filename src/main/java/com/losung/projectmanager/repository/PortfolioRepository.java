@@ -28,6 +28,9 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     // Buscar portafolios por programa
     List<Portfolio> findByProgramId(Long programId);
     
+    // Buscar portafolio por ID y status
+    Portfolio findByIdAndStatus(Long id, PortfolioStatus status);
+
     // Verificar si existe un portafolio con el mismo nombre
     boolean existsByName(String name);
 } 

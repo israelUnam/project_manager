@@ -33,6 +33,10 @@ public interface MetasRepository extends JpaRepository<Metas, Long> {
         LocalDateTime fechaInicio2, LocalDateTime fechaFin2
     );
     
+    // Buscar metas por portfolio ID y lista de estados
+    List<Metas> findByPortfolioIdAndStatusIn(Long portfolioId, List<MetasStatus> status);
+
+    
     // Verificar si existe una meta con el mismo nombre en un portfolio
     boolean existsByNombreAndPortfolio(String nombre, Portfolio portfolio);
 } 

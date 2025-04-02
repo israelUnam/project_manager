@@ -18,34 +18,26 @@
     <!-- Main Content -->
     <div id="main-content" class="main-content">
         <div class="container-fluid">
+
+            <div class="row mb-4">
+                <div class="col">
+                    <h2 class="mb-0">Estadísticas de los portafolios</h2>
+                </div>
+            </div>
+
             <div class="row">
 
-                <div class="col-md-6 col-lg-3" >
+                <div class="col-md-6 col-lg-3" th:each="estadistica : ${estadisticas}">
                     <div class="stats-card">
                         <div class="icon">
                             <i class="fas fa-tasks"></i>
                         </div>
                         <div class="chart-container" style="position: relative; height:100px; width:100px; margin: 0 auto;">
-                            <canvas id="progressChart1"></canvas>
+                            <canvas th:id="'progressChart' + ${estadistica.id} +'-' + ${estadistica.totalValorActual} + '-' + ${estadistica.totalLineaBase} "></canvas>
                         </div>
-                        <h3>7 de 15</h3>
-                        <p>Portafolio principal</p>
+                        <h3 th:text="${estadistica.totalValorActual} + ' de ' + ${estadistica.totalLineaBase} + ' puntos alcanzados'"></h3>
+                        <p th:text="${estadistica.name}"></p>
                     </div>
-
-                </div>
-            
-                <div class="col-md-6 col-lg-3" >
-                    <div class="stats-card">
-                        <div class="icon">
-                            <i class="fas fa-tasks"></i>
-                        </div>
-                        <div class="chart-container" style="position: relative; height:100px; width:100px; margin: 0 auto;">
-                            <canvas id="progressChart2"></canvas>
-                        </div>
-                        <h3>9 de 20</h3>
-                        <p>Casos de Negocio</p>
-                    </div>
-
                 </div>
                 
             </div>
@@ -597,9 +589,27 @@
                 });
             }
 
+
+
             // Inicializar las gráficas de progreso
-            createProgressChart('progressChart1', 7, 15);
-            createProgressChart('progressChart2', 9, 20);
+            document.querySelectorAll('[id^="progressChart"]').forEach(canvas => {
+                console.log(canvas);
+                const canvasId = canvas.id;
+                console.log(canvasId);
+
+                // Extraer los valores después de los guiones
+                const [_, valorActual, lineaBase] = canvasId.split('-');
+                console.log("Valor Actual:", valorActual);
+                console.log("Línea Base:", lineaBase);
+
+                const valorActualInt = parseInt(valorActual);
+                const lineaBaseInt = parseInt(lineaBase);
+
+                createProgressChart(canvas.id, valorActualInt, lineaBaseInt);
+
+
+
+            });
         });
 
         function confirmDelete(id) {
