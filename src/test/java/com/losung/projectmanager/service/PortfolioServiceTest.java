@@ -101,8 +101,8 @@ public class PortfolioServiceTest {
         assertEquals(1L, estadistica1.getId());
         assertEquals("Portfolio 1", estadistica1.getName());
         assertEquals(2, estadistica1.getTotalMetas());
-        assertEquals(200.0, estadistica1.getTotalLineaBase());
-        assertEquals(125.0, estadistica1.getTotalValorActual());
+        assertEquals(200, estadistica1.getTotalLineaBase());
+        assertEquals(125, estadistica1.getTotalValorActual());
         assertEquals(0.625, estadistica1.getPorcentajeAvance());
 
         // Verificar estadísticas del Portfolio 2
@@ -110,8 +110,8 @@ public class PortfolioServiceTest {
         assertEquals(2L, estadistica2.getId());
         assertEquals("Portfolio 2", estadistica2.getName());
         assertEquals(1, estadistica2.getTotalMetas());
-        assertEquals(50.0, estadistica2.getTotalLineaBase());
-        assertEquals(25.0, estadistica2.getTotalValorActual());
+        assertEquals(50, estadistica2.getTotalLineaBase());
+        assertEquals(25, estadistica2.getTotalValorActual());
         assertEquals(0.5, estadistica2.getPorcentajeAvance());
 
         // Verify
