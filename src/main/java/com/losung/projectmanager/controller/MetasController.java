@@ -29,7 +29,8 @@ public class MetasController {
         return metasRepository.findByPortfolio(portfolio);
     }
 
-    @GetMapping("/{portfolioId}/metas/{metaId}")
+    @SuppressWarnings("unused")
+@GetMapping("/{portfolioId}/metas/{metaId}")
     @ResponseBody
     public Metas getMeta(@PathVariable Long portfolioId, @PathVariable Long metaId) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
@@ -51,6 +52,7 @@ public class MetasController {
     @PutMapping("/{portfolioId}/metas/{metaId}")
     @ResponseBody
     public Metas updateMeta(@PathVariable Long portfolioId, @PathVariable Long metaId, @RequestBody Metas meta) {
+        @SuppressWarnings("unused")
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new RuntimeException("Portfolio no encontrado"));
         
