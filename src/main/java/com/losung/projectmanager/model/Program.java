@@ -3,7 +3,7 @@ package com.losung.projectmanager.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
-
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -20,16 +20,19 @@ public class Program {
     @Column(length = 1000)
     private String description;
 
-    @Column(name = "start_date")
-    private LocalDateTime startDate;
-
-    @Column(name = "end_date")
-    private LocalDateTime endDate;
+    @ManyToOne
+    @JoinColumn(name = "portfolio_id")
+    private Portfolio portfolio;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProgramStatus status;
     
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
     @Column(name = "objetivo")
     private String objetivo;
