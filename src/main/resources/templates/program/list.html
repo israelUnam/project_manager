@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Programas - Project Manager</title>
+    <headers th:replace="~{components/headers.html :: ~{_headers}}" />
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Sidebar Backdrop -->
+    <div class="sidebar-backdrop"></div>
+
+    <sliderbar th:replace="~{components/sliderbar.html :: ~{_sliderbar}}" />
+    <navbar th:replace="~{components/navbar.html :: ~{_navbar}}" />
+
+    <!-- Main Content -->
+    <div id="main-content" class="main-content">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col">
+                    <h2 class="mb-0">Programas</h2>
+                </div>
+                <div class="col text-end">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#programModal">
+                        <i class="fas fa-plus"></i> Nuevo Programa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Program Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Portafolio</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Inicio</th>
+                                    <th>Fecha Fin</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="program : ${programs}">
+                                    <td th:text="${program.name}"></td>
+                                    <td th:text="${program.description}"></td>
+                                    <td th:text="${program.portfolio.name}"></td>
+                                    <td>
+                                        <span th:class="${program.status == T(com.losung.projectmanager.model.ProgramStatus).ACTIVO ? 'badge bg-success' : 
+                                                       (program.status == T(com.losung.projectmanager.model.ProgramStatus).COMPLETADO ? 'badge bg-info' : 
+                                                       (program.status == T(com.losung.projectmanager.model.ProgramStatus).CANCELADO ? 'badge bg-danger' : 
+                                                       'badge bg-warning'))}"
+                                              th:text="${program.status}">
+                                        </span>
+                                    </td>
+                                    <td th:text="${#temporals.format(program.startDate, 'dd/MM/yyyy')}"></td>
+                                    <td th:text="${#temporals.format(program.endDate, 'dd/MM/yyyy')}"></td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" title="Proyectos" 
+                                                    th:onclick="'showProyectos(' + ${program.id} + ')'">
+                                                <i class="fas fa-project-diagram"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary" title="Editar" 
+                                                    th:onclick="'editProgram(' + ${program.id} + ')'">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Eliminar" 
+                                                    th:onclick="'confirmDelete(' + ${program.id} + ')'">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Crear Programa -->
+    <div class="modal fade" id="programModal" tabindex="-1" aria-labelledby="programModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="programModalLabel">Nuevo Programa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/programs}" method="post">
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="portfolio" class="form-label">Portafolio</label>
+                                <select class="form-select" id="portfolio" name="portfolio" required>
+                                    <option value="">Seleccionar Portafolio</option>
+                                    <option th:each="portfolio : ${portfolios}"
+                                            th:value="${portfolio.id}"
+                                            th:text="${portfolio.name}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Estado</label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="">Seleccionar Estado</option>
+                                    <option th:each="status : ${programStatuses}"
+                                            th:value="${status}"
+                                            th:text="${status}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label">Fecha de Inicio</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endDate" class="form-label">Fecha de Fin</label>
+                                <input type="date" class="form-control" id="endDate" name="endDate" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar este programa? Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="deleteForm" method="post" style="display: inline;">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Programa -->
+    <div class="modal fade" id="editProgramModal" tabindex="-1" aria-labelledby="editProgramModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProgramModalLabel">Editar Programa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editForm" method="post">
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editName" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="editName" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editPortfolio" class="form-label">Portafolio</label>
+                                <select class="form-select" id="editPortfolio" name="portfolio" required>
+                                    <option value="">Seleccionar Portafolio</option>
+                                    <option th:each="portfolio : ${portfolios}"
+                                            th:value="${portfolio.id}"
+                                            th:text="${portfolio.name}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editStatus" class="form-label">Estado</label>
+                                <select class="form-select" id="editStatus" name="status" required>
+                                    <option value="">Seleccionar Estado</option>
+                                    <option th:each="status : ${programStatuses}"
+                                            th:value="${status}"
+                                            th:text="${status}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDescription" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editStartDate" class="form-label">Fecha de Inicio</label>
+                                <input type="date" class="form-control" id="editStartDate" name="startDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editEndDate" class="form-label">Fecha de Fin</label>
+                                <input type="date" class="form-control" id="editEndDate" name="endDate" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Proyectos -->
+    <div class="modal fade" id="proyectosModal" tabindex="-1" aria-labelledby="proyectosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="proyectosModalLabel">Proyectos del Programa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoProyectoModal">
+                            <i class="fas fa-plus"></i> Nuevo Proyecto
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Inicio</th>
+                                    <th>Fecha Fin</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="proyectosTableBody">
+                                <!-- Los proyectos se cargarán dinámicamente aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script>
+        let deleteModal;
+        let editModal;
+        let proyectosModal;
+        let programId;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            editModal = new bootstrap.Modal(document.getElementById('editProgramModal'));
+            proyectosModal = new bootstrap.Modal(document.getElementById('proyectosModal'));
+            
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const backdrop = document.querySelector('.sidebar-backdrop');
+            
+            function toggleSidebar() {
+                const isMobile = window.innerWidth < 992;
+                
+                if (isMobile) {
+                    sidebar.classList.toggle('show');
+                    backdrop.classList.toggle('show');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('expanded');
+                }
+
+                // Cambiar el icono
+                const icon = sidebarToggle.querySelector('i');
+                if ((isMobile && sidebar.classList.contains('show')) || 
+                    (!isMobile && !sidebar.classList.contains('collapsed'))) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            }
+
+            function closeSidebar() {
+                if (window.innerWidth < 992) {
+                    sidebar.classList.remove('show');
+                    backdrop.classList.remove('show');
+                    const icon = sidebarToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            }
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            backdrop.addEventListener('click', closeSidebar);
+
+            // Cerrar sidebar al hacer clic en un enlace (en móvil)
+            const sidebarLinks = sidebar.querySelectorAll('.nav-link');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (window.innerWidth < 992) {
+                        closeSidebar();
+                    }
+                });
+            });
+
+            // Manejar cambios de tamaño de ventana
+            window.addEventListener('resize', () => {
+                const isMobile = window.innerWidth < 992;
+                
+                if (!isMobile) {
+                    // Si cambia a desktop
+                    closeSidebar();
+                } else {
+                    // Si cambia a móvil
+                    if (!sidebar.classList.contains('collapsed')) {
+                        sidebar.classList.remove('collapsed');
+                        mainContent.classList.remove('expanded');
+                    }
+                }
+            });
+        });
+
+        function confirmDelete(id) {
+            programId = id;
+            const deleteForm = document.getElementById('deleteForm');
+            deleteForm.action = `/programs/${id}`;
+            deleteModal.show();
+        }
+
+        async function editProgram(id) {
+            try {
+                const response = await fetch(`/programs/${id}`);
+                const program = await response.json();
+                
+                // Actualizar el formulario con los datos del programa
+                document.getElementById('editName').value = program.name;
+                document.getElementById('editDescription').value = program.description || '';
+                document.getElementById('editStartDate').value = program.startDate.split('T')[0];
+                document.getElementById('editEndDate').value = program.endDate.split('T')[0];
+                document.getElementById('editStatus').value = program.status;
+                document.getElementById('editPortfolio').value = program.portfolio.id;
+                
+                // Actualizar la acción del formulario
+                const editForm = document.getElementById('editForm');
+                editForm.action = `/programs/${id}/update`;
+                
+                // Mostrar el modal
+                editModal.show();
+            } catch (error) {
+                console.error('Error al cargar el programa:', error);
+                alert('Error al cargar el programa. Por favor, intente nuevamente.');
+            }
+        }
+
+        async function showProyectos(id) {
+            programId = id;
+            try {
+                const response = await fetch(`/programs/${id}/proyectos`);
+                const proyectos = await response.json();
+                
+                // Actualizar la tabla de proyectos
+                const tbody = document.getElementById('proyectosTableBody');
+                tbody.innerHTML = '';
+                
+                proyectos.forEach(proyecto => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${proyecto.nombre}</td>
+                        <td>${proyecto.descripcion || ''}</td>
+                        <td>
+                            <span class="badge ${getStatusBadgeClass(proyecto.status)}">
+                                ${proyecto.status}
+                            </span>
+                        </td>
+                        <td>${formatDate(proyecto.fechaInicio)}</td>
+                        <td>${formatDate(proyecto.fechaFin)}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-secondary" title="Editar" 
+                                        onclick="editProyecto(${proyecto.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" title="Eliminar" 
+                                        onclick="confirmDeleteProyecto(${proyecto.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                // Mostrar el modal
+                proyectosModal.show();
+            } catch (error) {
+                console.error('Error al cargar los proyectos:', error);
+                alert('Error al cargar los proyectos. Por favor, intente nuevamente.');
+            }
+        }
+
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'PLANIFICADO': return 'bg-secondary';
+                case 'EN_PROGRESO': return 'bg-primary';
+                case 'COMPLETADO': return 'bg-success';
+                case 'CANCELADO': return 'bg-danger';
+                case 'EN_PAUSA': return 'bg-warning';
+                default: return 'bg-secondary';
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString + 'T00:00:00');
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+    </script>
+</body>
+</html> 
