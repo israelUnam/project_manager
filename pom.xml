@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.losung</groupId>
 	<artifactId>projectmanager</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>projectmanager</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
@@ -52,8 +52,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.mysql</groupId>
-			<artifactId>mysql-connector-j</artifactId>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
