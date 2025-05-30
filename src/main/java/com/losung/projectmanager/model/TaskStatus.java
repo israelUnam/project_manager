@@ -1,16 +1,14 @@
 package com.losung.projectmanager.model;
 
-public enum ProjectStatus {
-    EN_INICIO("En Inicio"),
-    PLANIFICADO("Planificado"),
+public enum TaskStatus {
+    PENDIENTE("Pendiente"),
     EN_PROGRESO("En Progreso"),
-    COMPLETADO("Completado"),
-    CANCELADO("Cancelado"),
-    EN_PAUSA("En Pausa");
+    COMPLETADA("Completada"),
+    CANCELADA("Cancelada");
 
     private final String displayName;
 
-    ProjectStatus(String displayName) {
+    TaskStatus(String displayName) {
         this.displayName = displayName;
     }
 

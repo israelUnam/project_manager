@@ -7,6 +7,41 @@
     <headers th:replace="~{components/headers.html :: ~{_headers}}" />
     <!-- Custom CSS -->
     <link href="/css/style.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .bg-orange {
+            background-color: #fd7e14 !important;
+            color: white !important;
+        }
+        .bg-custom-yellow {
+            background-color: #ffc107 !important;
+            color: #000 !important;
+        }
+        .text-info-custom {
+            color: #0dcaf0 !important;
+            padding: 1rem;
+        }
+        .empty-state {
+            padding: 2rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        .empty-state h4 {
+            margin-bottom: 0.5rem;
+        }
+        .empty-state p {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+    </style>
 </head>
 <body>
     <!-- Sidebar Backdrop -->
@@ -15,121 +50,378 @@
     <sliderbar th:replace="~{components/sliderbar.html :: ~{_sliderbar}}" />
     <navbar th:replace="~{components/navbar.html :: ~{_navbar}}" />
 
-    <!-- Main Content -->
-    <div id="main-content" class="main-content">
-        <div class="container-fluid">
-            <div class="row mb-4">
-                <div class="col">
-                    <h2 class="mb-0">Proyectos</h2>
-                </div>
-                <div class="col text-end">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#projectModal">
-                        <i class="fas fa-plus"></i> Nuevo Proyecto
-                    </button>
-                </div>
-            </div>
-
-            <!-- Project Table -->
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Descripción</th>
-                                    <th>Estado</th>
-                                    <th>Fecha Inicio</th>
-                                    <th>Fecha Fin</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="project : ${projects}">
-                                    <td th:text="${project.name}"></td>
-                                    <td th:text="${project.description}"></td>
-                                    <td>
-                                        <span th:class="${project.status == T(com.losung.projectmanager.model.ProjectStatus).EN_PROGRESO ? 'badge bg-primary' : 
-                                                       (project.status == T(com.losung.projectmanager.model.ProjectStatus).COMPLETADO ? 'badge bg-success' : 
-                                                       (project.status == T(com.losung.projectmanager.model.ProjectStatus).CANCELADO ? 'badge bg-danger' : 
-                                                       'badge bg-warning'))}"
-                                              th:text="${project.status}">
-                                        </span>
-                                    </td>
-                                    <td th:text="${#temporals.format(project.startDate, 'dd/MM/yyyy')}"></td>
-                                    <td th:text="${#temporals.format(project.endDate, 'dd/MM/yyyy')}"></td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-sm btn-outline-secondary" title="Editar" 
-                                                    th:onclick="'editProject(' + ${project.id} + ')'">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger" title="Eliminar" 
-                                                    th:onclick="'confirmDelete(' + ${project.id} + ')'">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+    <th:block th:fragment="content">
+        <!-- Main Content de proyectos, sin headers, navbar ni sliderbar -->
+        <div id="main-content" class="main-content">
+            <div class="container-fluid">
+                <div class="row mb-4">
+                    <div class="col">
+                        <h2 class="mb-0">Proyectos</h2>
                     </div>
+                    <div class="col text-end">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#projectModal">
+                            <i class="fas fa-plus"></i> Nuevo Proyecto
+                        </button>
+                    </div>
+                </div>
+                <!-- Project Table -->
+                <div class="card" th:if="${projects != null and !projects.isEmpty()}">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Estado</th>
+                                        <th>Fecha Inicio</th>
+                                        <th>Fecha Fin</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="project : ${projects}">
+                                        <td th:text="${project.nombre}"></td>
+                                        <td th:text="${project.descripcion}"></td>
+                                        <td>
+                                            <span th:class="${project.status == T(com.losung.projectmanager.model.ProjectStatus).EN_PROGRESO ? 'badge bg-warning' : 
+                                                           (project.status == T(com.losung.projectmanager.model.ProjectStatus).COMPLETADO ? 'badge bg-success' : 
+                                                           (project.status == T(com.losung.projectmanager.model.ProjectStatus).CANCELADO ? 'badge bg-danger' :
+                                                           (project.status == T(com.losung.projectmanager.model.ProjectStatus).EN_PAUSA ? 'badge bg-orange' :
+                                                           (project.status == T(com.losung.projectmanager.model.ProjectStatus).PLANIFICADO ? 'badge bg-info' :
+                                                           (project.status == T(com.losung.projectmanager.model.ProjectStatus).EN_INICIO ? 'badge bg-primary' :
+                                                           'badge bg-secondary')))))}"
+                                                  th:text="${project.status}">
+                                            </span>
+                                        </td>
+                                        <td th:text="${#temporals.format(project.fechaInicio, 'dd/MM/yyyy')}"></td>
+                                        <td th:text="${#temporals.format(project.fechaFin, 'dd/MM/yyyy')}"></td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-sm btn-outline-secondary" title="Editar" 
+                                                        th:onclick="'showEditProjectModal(' + ${project.id} + ')'">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" title="Eliminar" 
+                                                        th:onclick="'confirmDelete(' + ${project.id} + ')'">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${projects == null or projects.isEmpty()}" class="empty-state">
+                    <i class="fas fa-project-diagram"></i>
+                    <h4>No hay proyectos disponibles</h4>
+                    <p>Puede crear un nuevo proyecto usando el botón "Nuevo Proyecto".</p>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal para Crear Proyecto -->
-    <div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="projectModalLabel">Nuevo Proyecto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Modal para Crear Proyecto -->
+        <div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="projectModalLabel">Nuevo Proyecto</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{/projects}" method="post" onsubmit="return validateDates('fechaInicio', 'fechaFin')">
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="nombre" class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="status" class="form-label">Estado</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="">Seleccionar Estado</option>
+                                        <option th:each="status : ${projectStatuses}"
+                                                th:value="${status}"
+                                                th:text="${status.displayName}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
+                                    <input type="date" class="form-control" id="fechaInicio" name="fechaInicio" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="fechaFin" class="form-label">Fecha de Fin</label>
+                                    <input type="date" class="form-control" id="fechaFin" name="fechaFin" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="presupuesto" class="form-label">Presupuesto</label>
+                                <input type="number" step="0.01" class="form-control" id="presupuesto" name="presupuesto">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </form>
                 </div>
-                <form th:action="@{/projects}" method="post">
+            </div>
+        </div>
+
+        <!-- Modal para Editar Proyecto -->
+        <div class="modal fade" id="editProjectModal" tabindex="-1" aria-labelledby="editProjectModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editProjectModalLabel">Editar Proyecto</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="editProjectForm" method="post" onsubmit="return validateDates('editFechaInicio', 'editFechaFin')">
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="editNombre" class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" id="editNombre" name="nombre" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editStatus" class="form-label">Estado</label>
+                                    <select class="form-select" id="editStatus" name="status" required>
+                                        <option value="">Seleccionar Estado</option>
+                                        <option th:each="status : ${projectStatuses}"
+                                                th:value="${status}"
+                                                th:text="${status.displayName}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editDescripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="editDescripcion" name="descripcion" rows="3"></textarea>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="editFechaInicio" class="form-label">Fecha de Inicio</label>
+                                    <input type="date" class="form-control" id="editFechaInicio" name="fechaInicio" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editFechaFin" class="form-label">Fecha de Fin</label>
+                                    <input type="date" class="form-control" id="editFechaFin" name="fechaFin" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editPresupuesto" class="form-label">Presupuesto</label>
+                                <input type="number" step="0.01" class="form-control" id="editPresupuesto" name="presupuesto">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Confirmación de Eliminación -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
                     <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="name" class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="name" name="name" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="status" class="form-label">Estado</label>
-                                <select class="form-select" id="status" name="status" required>
-                                    <option value="">Seleccionar Estado</option>
-                                    <option th:each="status : ${projectStatuses}"
-                                            th:value="${status}"
-                                            th:text="${status}">
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Descripción</label>
-                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="startDate" class="form-label">Fecha de Inicio</label>
-                                <input type="date" class="form-control" id="startDate" name="startDate" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="endDate" class="form-label">Fecha de Fin</label>
-                                <input type="date" class="form-control" id="endDate" name="endDate" required>
-                            </div>
-                        </div>
+                        ¿Está seguro de que desea eliminar este proyecto? Esta acción no se puede deshacer.
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <form id="deleteForm" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
-    </div>
+    </th:block>
 
-    <!-- Bootstrap 5 JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script>
+        let editProjectModal;
+        let deleteModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            editProjectModal = new bootstrap.Modal(document.getElementById('editProjectModal'));
+            deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            var userDropdown = document.getElementById('userDropdown');
+            if (userDropdown && !bootstrap.Dropdown.getInstance(userDropdown)) {
+                new bootstrap.Dropdown(userDropdown);
+            }
+        });
+
+        async function showEditProjectModal(id) {
+            try {
+                const response = await fetch(`/projects/${id}`);
+                if (!response.ok) {
+                    throw new Error('Error al cargar los datos del proyecto');
+                }
+                const project = await response.json();
+
+                // Llenar el formulario con los datos del proyecto
+                document.getElementById('editNombre').value = project.nombre;
+                document.getElementById('editDescripcion').value = project.descripcion || '';
+                document.getElementById('editStatus').value = project.status;
+                document.getElementById('editFechaInicio').value = project.fechaInicio;
+                document.getElementById('editFechaFin').value = project.fechaFin;
+                document.getElementById('editPresupuesto').value = project.presupuesto || '';
+
+                // Configurar la acción del formulario
+                const form = document.getElementById('editProjectForm');
+                form.action = `/projects/${id}/update`;
+
+                // Mostrar el modal
+                editProjectModal.show();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar los datos del proyecto');
+            }
+        }
+
+        function confirmDelete(id) {
+            Swal.fire({
+                title: '¿Está seguro?',
+                text: "¿Desea eliminar este proyecto? Esta acción no se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/projects/${id}/delete`;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        function validateDates(startDateId, endDateId) {
+            const fechaInicio = document.getElementById(startDateId).value;
+            const fechaFin = document.getElementById(endDateId).value;
+
+            if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+                Swal.fire({
+                    title: 'Advertencia',
+                    text: 'La fecha de fin no puede ser anterior a la fecha de inicio',
+                    icon: 'warning',
+                    confirmButtonText: 'Aceptar',
+                    confirmButtonColor: '#3085d6'
+                });
+                return false;
+            }
+            return true;
+        }
+
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'EN_INICIO': return 'bg-primary';
+                case 'PLANIFICADO': return 'bg-info';
+                case 'EN_PROGRESO': return 'bg-warning';
+                case 'COMPLETADO': return 'bg-success';
+                case 'CANCELADO': return 'bg-danger';
+                case 'EN_PAUSA': return 'bg-orange';
+                default: return 'bg-secondary';
+            }
+        }
+
+        function createProject() {
+            Swal.fire({
+                title: 'Nuevo Proyecto',
+                html:
+                    `<div class="mb-3 text-start">
+                        <label class="form-label">Nombre</label>
+                        <input id="swal-input1" class="swal2-input" placeholder="Nombre">
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label class="form-label">Descripción</label>
+                        <textarea id="swal-input2" class="swal2-textarea" placeholder="Descripción"></textarea>
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label class="form-label">Fecha Inicio</label>
+                        <input id="swal-input3" class="swal2-input" type="date">
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label class="form-label">Fecha Fin</label>
+                        <input id="swal-input4" class="swal2-input" type="date">
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label class="form-label">Estado</label>
+                        <select id="swal-input5" class="swal2-select">
+                            <option value="">Seleccionar Estado</option>
+                            <option th:each="status : ${projectStatuses}"
+                                    th:value="${status}"
+                                    th:text="${status.displayName}">
+                            </option>
+                        </select>
+                    </div>`,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Crear',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const nombre = document.getElementById('swal-input1').value;
+                    const descripcion = document.getElementById('swal-input2').value;
+                    const fechaInicio = document.getElementById('swal-input3').value;
+                    const fechaFin = document.getElementById('swal-input4').value;
+                    const status = document.getElementById('swal-input5').value;
+                    
+                    if (!nombre || !fechaInicio || !fechaFin || !status) {
+                        Swal.showValidationMessage('Por favor complete los campos obligatorios');
+                        return false;
+                    }
+
+                    if (fechaFin < fechaInicio) {
+                        Swal.showValidationMessage('La fecha de fin no puede ser anterior a la fecha de inicio');
+                        return false;
+                    }
+                    
+                    return { nombre, descripcion, fechaInicio, fechaFin, status };
+                }
+            }).then((result) => {
+                if (result.value) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/projects';
+                    
+                    const addHiddenInput = (name, value) => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = name;
+                        input.value = value;
+                        form.appendChild(input);
+                    };
+                    
+                    addHiddenInput('nombre', result.value.nombre);
+                    addHiddenInput('descripcion', result.value.descripcion);
+                    addHiddenInput('fechaInicio', result.value.fechaInicio);
+                    addHiddenInput('fechaFin', result.value.fechaFin);
+                    addHiddenInput('status', result.value.status);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+    </script>
 </body>
 </html>

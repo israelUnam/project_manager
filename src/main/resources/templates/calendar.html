@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calendario - Project Manager</title>
+    <headers th:replace="~{components/headers.html :: ~{_headers}}" />
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="sidebar-backdrop"></div>
+    <sliderbar th:replace="~{components/sliderbar.html :: ~{_sliderbar}}" />
+    <navbar th:replace="~{components/navbar.html :: ~{_navbar}}" />
+    <div id="main-content" class="main-content">
+        <div class="container-fluid">
+            <h2 class="mb-4">Calendarios</h2>
+            <div th:if="${projects == null or projects.isEmpty()}" class="empty-state text-center" style="margin: 2rem 0; padding: 2rem; background-color: #f8f9fa; border-radius: 0.5rem;">
+                <i class="fas fa-calendar-alt" style="font-size: 3rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                <h4 style="margin-bottom: 0.5rem;">No hay calendarios disponibles</h4>
+                <p class="text-muted" style="margin-bottom: 0;">Primero debe crear un proyecto para poder ver el calendario de tareas.</p>
+            </div>
+            <div th:if="${projects != null and !projects.isEmpty()}">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        
+                    </div>
+                    <div class="col-md-6 text-end">
+                        
+                        <form method="get" action="/calendar">
+                            <h3 class="mb-0" style="display: inline-block; margin-right: 10px; font-size: 1.5em;">Selecciona un proyecto: </h3>
+                            <select class="form-select d-inline-block w-auto" name="projectId" onchange="this.form.submit()">
+                                <option th:each="project : ${projects}"
+                                        th:value="${project.id}"
+                                        th:text="${project.nombre}"
+                                        th:selected="${selectedProject != null and project.id == selectedProject.id}">
+                                </option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script th:inline="javascript">
+        // Mapea el estado a color Bootstrap
+        function getTaskColor(status) {
+            switch(status) {
+                case 'PENDIENTE': return '#ffc107'; // bg-warning
+                case 'EN_PROGRESO': return '#0d6efd'; // bg-primary
+                case 'COMPLETADA': return '#198754'; // bg-success
+                case 'CANCELADA': return '#dc3545'; // bg-danger
+                default: return '#6c757d'; // bg-secondary
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var tasks = /*[[${tasks}]]*/ [];
+            // Si Thymeleaf no reemplaza, intenta con JSON.parse
+            if (typeof tasks === 'string') {
+                tasks = JSON.parse(tasks);
+            }
+            var events = tasks.map(function(task) {
+                return {
+                    title: task.nombre,
+                    start: task.fechaInicio,
+                    end: task.fechaFin ? new Date(new Date(task.fechaFin).getTime() + 24*60*60*1000).toISOString().split('T')[0] : task.fechaInicio,
+                    backgroundColor: getTaskColor(task.status),
+                    borderColor: getTaskColor(task.status),
+                    textColor: '#fff',
+                    extendedProps: {
+                        descripcion: task.descripcion,
+                        status: task.status
+                    }
+                };
+            });
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: ''
+                },
+                events: events,
+                eventDidMount: function(info) {
+                    // Tooltip con descripción y estado
+                    if (info.event.extendedProps.descripcion) {
+                        var tooltip = document.createElement('div');
+                        tooltip.className = 'fc-tooltip';
+                        tooltip.innerHTML = '<b>' + info.event.title + '</b><br>' + info.event.extendedProps.descripcion + '<br><span class="badge" style="background:' + info.event.backgroundColor + ';color:#fff">' + info.event.extendedProps.status + '</span>';
+                        info.el.addEventListener('mouseenter', function() {
+                            document.body.appendChild(tooltip);
+                            tooltip.style.position = 'absolute';
+                            tooltip.style.left = (info.jsEvent ? info.jsEvent.pageX : 0) + 'px';
+                            tooltip.style.top = (info.jsEvent ? info.jsEvent.pageY : 0) + 'px';
+                        });
+                        info.el.addEventListener('mouseleave', function() {
+                            if (tooltip.parentNode) tooltip.parentNode.removeChild(tooltip);
+                        });
+                    }
+                }
+            });
+            calendar.render();
+        });
+    </script>
+    <style>
+        #calendar {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        .fc-tooltip {
+            z-index: 9999;
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            pointer-events: none;
+        }
+    </style>
+</body>
+</html> 

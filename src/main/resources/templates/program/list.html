@@ -7,8 +7,11 @@
     <headers th:replace="~{components/headers.html :: ~{_headers}}" />
     <!-- Custom CSS -->
     <link href="/css/style.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+<th:block th:fragment="content">
     <!-- Sidebar Backdrop -->
     <div class="sidebar-backdrop"></div>
 
@@ -267,9 +270,6 @@
         </div>
     </div>
 
-    <!-- Bootstrap 5 JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
     <!-- Custom JS -->
     <script>
         let deleteModal;
@@ -348,6 +348,11 @@
                     }
                 }
             });
+
+            var userDropdown = document.getElementById('userDropdown');
+            if (userDropdown && !bootstrap.Dropdown.getInstance(userDropdown)) {
+                new bootstrap.Dropdown(userDropdown);
+            }
         });
 
         function confirmDelete(id) {
@@ -448,5 +453,6 @@
             return `${day}/${month}/${year}`;
         }
     </script>
+</th:block>
 </body>
 </html> 

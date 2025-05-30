@@ -1,31 +1,31 @@
 <!-- Sidebar -->
-<div id="sidebar" class="sidebar py-3">
-    <div class="text-center mb-4">
-        <h4 class="text-primary">Project Manager</h4>
+<div th:fragment="sidebar" class="sidebar">
+    <div class="text-center py-4">
+        <h4 class="text-primary mb-0">Project Manager</h4>
     </div>
     <nav class="nav flex-column">
-        <a class="nav-link active" href="/">
+        <a class="nav-link" th:href="@{/}" th:classappend="${currentPath == '/' ? 'active' : ''}">
             <i class="fas fa-home"></i> Inicio
         </a>
-        <a class="nav-link" href="/programs">
+        <a class="nav-link" th:href="@{/programs}" th:classappend="${currentPath == '/programs' ? 'active' : ''}">
             <i class="fas fa-layer-group"></i> Programas
         </a>
-        <a class="nav-link" href="/portfolios">
+        <a class="nav-link" th:href="@{/portfolios}" th:classappend="${currentPath == '/portfolios' ? 'active' : ''}">
             <i class="fas fa-folder-open"></i> Portafolios
         </a>
-        <a class="nav-link" href="/projects">
+        <a class="nav-link" th:href="@{/projects}" th:classappend="${currentPath == '/projects' ? 'active' : ''}">
             <i class="fas fa-project-diagram"></i> Proyectos
         </a>
-        <a class="nav-link" href="/tasks">
+        <a class="nav-link" th:href="@{/tasks}" th:classappend="${currentPath == '/tasks' ? 'active' : ''}">
             <i class="fas fa-tasks"></i> Tareas
         </a>
-        <a class="nav-link" href="/team">
+        <a class="nav-link" th:href="@{/teams}" th:classappend="${currentPath == '/teams' ? 'active' : ''}">
             <i class="fas fa-users"></i> Equipos
         </a>
-        <a class="nav-link" href="/calendar">
+        <a class="nav-link" th:href="@{/calendar}" th:classappend="${currentPath == '/calendar' ? 'active' : ''}">
             <i class="fas fa-calendar"></i> Calendarios
         </a>
-        <a class="nav-link" href="/reports">
+        <a class="nav-link" th:href="@{/reports}" th:classappend="${currentPath == '/reports' ? 'active' : ''}">
             <i class="fas fa-chart-bar"></i> Reportes
         </a>
     </nav>
