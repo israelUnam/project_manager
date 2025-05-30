@@ -1,0 +1,13 @@
+Cambios implementados: 
+
+1. Ya funciona la ventana para agregar un proyecto. 
+2. Ya despliega la lista de los proyectos agregados.
+3. Los botones de la columna acciones en la lista de proyectos ya funcionan. Permite editar el proyecto o eliminarlo pidiéndote confirmación.
+4. El botón del menú ya mantiene en color morado el que está seleccionado.
+5. Agregue la pestaña de tareas para que muestre la lista de tareas por proyectos.
+6. Ya puedes agregar tareas, editarlas y eliminarlas.
+7. Se muestra un mensaje cuando no hay tareas o proyectos que listar.
+8. Valida las fechas de inicio y fin que se definen.
+9. Ya se muestran los equipos, permite agregar un equipo por proyecto con sus integrantes y roles, deja editarlos, eliminarlos o agregar un nuevo integrante.
+10. No se puede borrar un integrante que tiene ya tareas asignadas. 
+11. Se agregó la vista de calendarios para cada proyecto, se puede cambiar entre proyectos. (Falta desplegar las tareas)
