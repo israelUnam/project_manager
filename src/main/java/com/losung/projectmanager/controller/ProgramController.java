@@ -7,7 +7,6 @@ import com.losung.projectmanager.model.ProjectStatus;
 import com.losung.projectmanager.service.ProgramService;
 import com.losung.projectmanager.service.ProjectService;
 import com.losung.projectmanager.service.PortfolioService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,6 @@ public class ProgramController {
     private final ProjectService projectService;
     private final PortfolioService portfolioService;
 
-    @Autowired
     public ProgramController(ProgramService programService, 
                            ProjectService projectService,
                            PortfolioService portfolioService) {

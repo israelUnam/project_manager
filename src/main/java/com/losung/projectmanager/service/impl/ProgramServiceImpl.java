@@ -3,7 +3,6 @@ package com.losung.projectmanager.service.impl;
 import com.losung.projectmanager.model.Program;
 import com.losung.projectmanager.repository.ProgramRepository;
 import com.losung.projectmanager.service.ProgramService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,7 +13,7 @@ public class ProgramServiceImpl implements ProgramService {
 
     private final ProgramRepository programRepository;
 
-    @Autowired
+    
     public ProgramServiceImpl(ProgramRepository programRepository) {
         this.programRepository = programRepository;
     }
