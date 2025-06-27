@@ -38,14 +38,14 @@ public class PortfolioService {
     public List<PortfolioEstadistica> calcularEstadisticasActivos() {
         List<PortfolioEstadistica> estadistica = new ArrayList<>();
 
-        List<Portfolio> portfolio = portfolioRepository.findByStatus(PortfolioStatus.ACTIVO);
+        List<Portfolio> portfolio = portfolioRepository.findByStatusIn(List.of(PortfolioStatus.ACTIVO, PortfolioStatus.COMPLETADO));
 
         for (Portfolio p : portfolio) {
             PortfolioEstadistica e = new PortfolioEstadistica();
             e.setId(p.getId());
             e.setName(p.getName());
             
-            List<MetasStatus> metasStatus = Arrays.asList(MetasStatus.EN_PROGRESO, MetasStatus.COMPLETADA);
+            List<MetasStatus> metasStatus = Arrays.asList(MetasStatus.EN_PROGRESO, MetasStatus.COMPLETADA, MetasStatus.PLANIFICADA);
             List<Metas> metas = metasRepository.findByPortfolioIdAndStatusIn(p.getId(), metasStatus);
             e.setTotalMetas(metas.size());  
             e.setTotalLineaBase((int) metas.stream().mapToDouble(Metas::getLineaBase).sum());
@@ -66,6 +66,7 @@ public class PortfolioService {
             String startDate,
             String endDate,
             String status,
+            String objectivos,
             String misión,
             String visión,
             String valores,
@@ -77,6 +78,7 @@ public class PortfolioService {
         portfolio.setStartDate(LocalDateTime.parse(startDate + "T00:00:00"));
         portfolio.setEndDate(LocalDateTime.parse(endDate + "T00:00:00"));
         portfolio.setStatus(PortfolioStatus.valueOf(status));
+        portfolio.setObjectivos(objectivos);
         portfolio.setMisión(misión);
         portfolio.setVisión(visión);
         portfolio.setValores(valores);
@@ -93,6 +95,7 @@ public class PortfolioService {
             String startDate,
             String endDate,
             String status,
+            String objectivos,
             String misión,
             String visión,
             String valores,
@@ -106,11 +109,29 @@ public class PortfolioService {
         portfolio.setStartDate(LocalDateTime.parse(startDate + "T00:00:00"));
         portfolio.setEndDate(LocalDateTime.parse(endDate + "T00:00:00"));
         portfolio.setStatus(PortfolioStatus.valueOf(status));
+        portfolio.setObjectivos(objectivos);
         portfolio.setMisión(misión);
         portfolio.setVisión(visión);
         portfolio.setValores(valores);
         portfolio.setCriteriosPriorizacion(criteriosPriorizacion);
         
+        return portfolioRepository.save(portfolio);
+    }
+
+    @Transactional
+    public Portfolio updatePortfolio(Portfolio updated) {
+        Portfolio portfolio = portfolioRepository.findById(updated.getId())
+                .orElseThrow(() -> new RuntimeException("Portafolio no encontrado"));
+        portfolio.setName(updated.getName());
+        portfolio.setDescription(updated.getDescription());
+        portfolio.setStartDate(updated.getStartDate());
+        portfolio.setEndDate(updated.getEndDate());
+        portfolio.setStatus(updated.getStatus());
+        portfolio.setObjectivos(updated.getObjectivos());
+        portfolio.setMisión(updated.getMisión());
+        portfolio.setVisión(updated.getVisión());
+        portfolio.setValores(updated.getValores());
+        portfolio.setCriteriosPriorizacion(updated.getCriteriosPriorizacion());
         return portfolioRepository.save(portfolio);
     }
 
@@ -124,4 +145,4 @@ public class PortfolioService {
     public boolean existsById(Long id) {
         return portfolioRepository.existsById(id);
     }
-} 
+}

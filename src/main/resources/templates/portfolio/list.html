@@ -147,6 +147,10 @@
                             </div>
                         </div>
                         <div class="mb-3">
+                            <label for="objectivos" class="form-label">Objetivo</label>
+                            <textarea class="form-control" id="objectivos" name="objectivos" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
                             <label for="mision" class="form-label">Misión</label>
                             <textarea class="form-control" id="mision" name="misión" rows="2"></textarea>
                         </div>
@@ -232,6 +236,10 @@
                                 <label for="editEndDate" class="form-label">Fecha de Fin</label>
                                 <input type="date" class="form-control" id="editEndDate" name="endDate" required>
                             </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editObjectivos" class="form-label">Objetivo</label>
+                            <textarea class="form-control" id="editObjectivos" name="objectivos" rows="3"></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="editMision" class="form-label">Misión</label>
@@ -634,6 +642,7 @@
                 document.getElementById('editVision').value = portfolio.visión || '';
                 document.getElementById('editValores').value = portfolio.valores || '';
                 document.getElementById('editCriteriosPriorizacion').value = portfolio.criteriosPriorizacion || '';
+                document.getElementById('editObjectivos').value = portfolio.objectivos || '';
                 
                 // Actualizar la acción del formulario
                 const editForm = document.getElementById('editForm');
@@ -644,6 +653,41 @@
             } catch (error) {
                 console.error('Error al cargar el portafolio:', error);
                 alert('Error al cargar el portafolio. Por favor, intente nuevamente.');
+            }
+        }
+
+        // Interceptar el submit del formulario de edición para enviar el campo 'objectivos' junto con los demás datos
+        const editForm = document.getElementById('editForm');
+        if (editForm) {
+            editForm.onsubmit = async function(event) {
+                event.preventDefault();
+                const formData = new FormData(editForm);
+                const data = {
+                    name: formData.get('name'),
+                    description: formData.get('description'),
+                    startDate: formData.get('startDate') ? formData.get('startDate') + 'T00:00:00' : null,
+                    endDate: formData.get('endDate') ? formData.get('endDate') + 'T00:00:00' : null,
+                    status: formData.get('status'),
+                    misión: formData.get('misión'),
+                    visión: formData.get('visión'),
+                    valores: formData.get('valores'),
+                    criteriosPriorizacion: formData.get('criteriosPriorizacion'),
+                    objectivos: formData.get('objectivos')
+                };
+                try {
+                    const response = await fetch(editForm.action, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (!response.ok) throw new Error('Error al actualizar el portafolio');
+                    // Cerrar el modal y recargar la página o actualizar la tabla si es necesario
+                    editModal.hide();
+                    location.reload();
+                } catch (error) {
+                    alert('Error al actualizar el portafolio. Por favor, intente nuevamente.');
+                }
+                return false;
             }
         }
 
@@ -893,4 +937,4 @@
         }
     </script>
 </body>
-</html> 
+</html>

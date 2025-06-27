@@ -28,6 +28,9 @@ public class Portfolio {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
+    @Column(name = "Objectivos", columnDefinition = "TEXT")
+    private String objectivos;
+
     @Column(name = "Mision", columnDefinition = "TEXT")
     private String misión;
 
@@ -69,4 +72,4 @@ public class Portfolio {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-} 
+}

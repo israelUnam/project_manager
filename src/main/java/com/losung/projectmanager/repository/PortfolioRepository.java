@@ -15,6 +15,8 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     
     // Buscar portafolios por estado
     List<Portfolio> findByStatus(PortfolioStatus status);
+
+    List<Portfolio> findByStatusIn(List<PortfolioStatus> statuses);
     
     // Buscar portafolios activos ordenados por fecha de inicio
     List<Portfolio> findByStatusOrderByStartDateDesc(PortfolioStatus status);
