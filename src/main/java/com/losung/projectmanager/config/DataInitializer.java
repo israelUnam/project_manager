@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.springframework.context.annotation.Configuration;
 
+import com.losung.projectmanager.model.BitAcciones;
+import com.losung.projectmanager.model.Bitacora;
 import com.losung.projectmanager.model.Metas;
 import com.losung.projectmanager.model.MetasStatus;
 import com.losung.projectmanager.model.Portfolio;
@@ -14,6 +16,7 @@ import com.losung.projectmanager.model.Program;
 import com.losung.projectmanager.model.ProgramStatus;
 import com.losung.projectmanager.repository.PortfolioRepository;
 import com.losung.projectmanager.repository.ProgramRepository;
+import com.losung.projectmanager.service.BitacoraService;
 
 import jakarta.annotation.PostConstruct;
 
@@ -21,10 +24,13 @@ import jakarta.annotation.PostConstruct;
 public class DataInitializer {
     private PortfolioRepository portfolioRepository;
     private ProgramRepository programRepository;
+    private BitacoraService bitacoraService;
 
-    public DataInitializer(PortfolioRepository portfolioRepository, ProgramRepository programRepository) {
+    public DataInitializer(PortfolioRepository portfolioRepository, ProgramRepository programRepository, 
+            BitacoraService bitacoraService) {
         this.portfolioRepository = portfolioRepository;
         this.programRepository = programRepository;
+        this.bitacoraService = bitacoraService;
     }
 
     @PostConstruct
@@ -244,7 +250,14 @@ public class DataInitializer {
             portfolio2.setMetas(List.of(metaB1, metaB2, metaB3, metaB4, metaB5, metaB6, metaB7, metaB8));
 
             portfolioRepository.save(portfolio1);
+
+            bitacoraService.save(new Bitacora(
+                    BitAcciones.PORTAFOLIO_CREADO ,"usuario", LocalDateTime.now(),  portfolio1.getName()));
+
             portfolioRepository.save(portfolio2);
+
+            bitacoraService.save(new Bitacora(
+                    BitAcciones.PORTAFOLIO_CREADO  ,"usuario", LocalDateTime.now(), portfolio2.getName()));
 
             Program program = new Program();
             program.setName("Prog. 1");
@@ -257,6 +270,9 @@ public class DataInitializer {
             program.setPortfolio(portfolio1);
             programRepository.save(program);
 
+                bitacoraService.save(new Bitacora(
+                        BitAcciones.PROGRAMA_CREADO  ,"usuario", LocalDateTime.now(), program.getName()));
+
             Program program2 = new Program();
             program2.setName("Prog. 2");
             program2.setDescription("Gestión Institucional. Apoya las relaciones al interior de la UNAM para realizar el congreso");
@@ -268,6 +284,9 @@ public class DataInitializer {
             program2.setPortfolio(portfolio1);
 
             programRepository.save(program2);
+
+                bitacoraService.save(new Bitacora(
+                        BitAcciones.PROGRAMA_CREADO  ,"usuario", LocalDateTime.now(), program2.getName()));
         }
     }
 }
